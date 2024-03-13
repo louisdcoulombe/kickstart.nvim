@@ -20,6 +20,10 @@
 =====================================================================
 =====================================================================
 
+TODO: Install golang and python lsp
+TODO: Install dap for golang and python
+
+
 What is Kickstart?
 
   Kickstart.nvim is *not* a distribution.
