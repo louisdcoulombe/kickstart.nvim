@@ -501,15 +501,23 @@ require('lazy').setup {
 
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
+      local actions = require 'telescope.actions'
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
         --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
+        defaults = {
+          mappings = {
+            i = {
+              -- ['<C-n>'] = actions.cycle_history_next,
+              -- ['<C-p>'] = actions.cycle_history_prev,
+              -- ['<C-j>'] = actions.move_selection_next,
+              -- ['<C-k>'] = actions.move_selection_previous,
+              ['<C-c>'] = actions.git_create_branch,
+            },
+            n = { q = actions.close },
+          },
+        },
         -- pickers = {}
         extensions = {
           ['ui-select'] = {
@@ -545,9 +553,20 @@ require('lazy').setup {
       end, { desc = '[F]ind words in all files' })
       vim.keymap.set('n', '<leader>fd', builtin.diagnostics, { desc = '[F]ind [D]iagnostics' })
       vim.keymap.set('n', '<leader>fr', builtin.resume, { desc = '[F]ind [R]esume' })
-      vim.keymap.set('n', '<leader>gf', builtin.git_files, { desc = '[F]ind git files' })
       vim.keymap.set('n', '<leader>f.', builtin.oldfiles, { desc = '[F]ind Recent Files ("." for repeat)' })
       vim.keymap.set('n', "<leader>f'", builtin.marks, { desc = '[F]ind marks' })
+
+      vim.keymap.set('n', '<leader>gf', builtin.git_files, { desc = '[F]ind git files' })
+      vim.keymap.set('n', '<leader>gb', function()
+        builtin.git_branches { use_file_path = true }
+      end, { desc = 'Git branches' })
+      vim.keymap.set('n', '<leader>gc', function()
+        builtin.git_commits { use_file_path = true }
+      end, { desc = 'Git commits' })
+      vim.keymap.set('n', '<leader>gC', function()
+        builtin.git_bcommits { use_file_path = true }
+      end, { desc = 'Git commits' })
+
       -- maps.n["<leader>f'"] = { function() require("telescope.builtin").marks() end, desc = "Find marks" }
       vim.keymap.set('n', '<leader><leader>', builtin.resume, { desc = 'Telescope: Resume previous search' })
       -- maps.n["<leader>f<CR>"] = { function() require("telescope.builtin").resume() end, desc = "Resume previous search" }
