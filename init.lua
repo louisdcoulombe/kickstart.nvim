@@ -509,6 +509,8 @@ require('lazy').setup {
       -- TODO: Move s -> f
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
+      -- maps.n["<leader>fb"] = { function() require("telescope.builtin").buffers() end, desc = "Find buffers" }
+      vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = '[F]ind Buffers' })
       vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = '[F]ind [H]elp' })
       vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = '[F]ind [K]eymaps' })
       vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[F]ind [F]iles' })
