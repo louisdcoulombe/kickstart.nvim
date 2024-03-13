@@ -516,7 +516,10 @@ require('lazy').setup {
       vim.keymap.set('n', '<leader>fr', builtin.resume, { desc = '[F]ind [R]esume' })
       vim.keymap.set('n', '<leader>gf', builtin.git_files, { desc = '[F]ind git files' })
       vim.keymap.set('n', '<leader>f.', builtin.oldfiles, { desc = '[F]ind Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', "<leader>f'", builtin.marks, { desc = '[F]ind marks' })
+      -- maps.n["<leader>f'"] = { function() require("telescope.builtin").marks() end, desc = "Find marks" }
+      vim.keymap.set('n', '<leader><leader>', builtin.resume, { desc = 'Telescope: Resume previous search' })
+      -- maps.n["<leader>f<CR>"] = { function() require("telescope.builtin").resume() end, desc = "Resume previous search" }
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>b/', function()
@@ -525,7 +528,7 @@ require('lazy').setup {
           winblend = 10,
           previewer = false,
         })
-      end, { desc = '[/] Fuzzily search in current buffer' })
+      end, { desc = '[b/] Fuzzily search in current buffer' })
 
       -- Also possible to pass additional configuration options.
       --  See `:help telescope.builtin.live_grep()` for information about particular keys
