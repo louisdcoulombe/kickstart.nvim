@@ -313,6 +313,9 @@ require('lazy').setup {
   {
     'tpope/vim-fugitive',
     lazy = false,
+    config = function()
+      vim.keymap.set('n', '<leader>gg', ':G<cr>', { desc = 'Fugitive' })
+    end,
   },
 
   -- Here is a more advanced example where we pass configuration
