@@ -561,10 +561,10 @@ require('lazy').setup {
       vim.keymap.set('n', '<leader>gb', function()
         builtin.git_branches { use_file_path = true }
       end, { desc = 'Git branches' })
-      vim.keymap.set('n', '<leader>gc', function()
+      vim.keymap.set('n', '<leader>gM', function()
         builtin.git_commits { use_file_path = true }
       end, { desc = 'Git commits' })
-      vim.keymap.set('n', '<leader>gC', function()
+      vim.keymap.set('n', '<leader>gm', function()
         builtin.git_bcommits { use_file_path = true }
       end, { desc = 'Git commits' })
 
