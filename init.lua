@@ -167,7 +167,7 @@ vim.keymap.set('n', '<A-Down>', ':resize -5<CR>', { desc = 'Recenter when moving
 -- ["<leader>d"] = {"[[\"_d]]", desc="Delete without affecting buffer"},
 vim.keymap.set('n', 'Y', 'y$', { desc = 'Yank remaining line' })
 vim.keymap.set('n', '<leader>p', '[["_dP]]', { desc = 'Paste from clipboard' })
-vim.keymap.set('n', '<leader>d', '[["_d]]', { desc = 'Delete without affecting buffer' })
+-- vim.keymap.set('n', '<leader>d', '[["_d]]', { desc = 'Delete without affecting buffer' })
 vim.keymap.set('n', '<leader>y', '[["+y]]', { desc = 'Copy to clipboard' })
 vim.keymap.set('n', '<leader>Y', '[["+Y]]', { desc = 'Copy to clipboard (Y)' })
 vim.keymap.set('n', '<leader><tab>', ':bn<cr>', { desc = 'Next tab' })
@@ -429,9 +429,10 @@ require('lazy').setup {
       -- Document existing key chains
       require('which-key').register {
         ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        -- ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+        ['<leader>d'] = { name = '[D]ebugger', _ = 'which_key_ignore' },
         ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
         ['<leader>f'] = { name = '[F]ind', _ = 'which_key_ignore' },
+        ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
         ['<leader>x'] = { name = '[X]custom', _ = 'which_key_ignore' },
       }
@@ -550,7 +551,6 @@ require('lazy').setup {
       pcall(require('telescope').load_extension, 'fzf')
       pcall(require('telescope').load_extension, 'ui-select')
 
-      -- TODO: Move s -> f
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
       -- maps.n["<leader>fb"] = { function() require("telescope.builtin").buffers() end, desc = "Find buffers" }
@@ -615,7 +615,17 @@ require('lazy').setup {
       end, { desc = '[F]ind [N]eovim files' })
     end,
   },
-
+  {
+    'jay-babu/mason-nvim-dap.nvim',
+    dependencies = {
+      'williamboman/mason.nvim',
+      'mfussenegger/nvim-dap',
+    },
+    config = function()
+      require('mason').setup()
+      require('mason-nvim-dap').setup()
+    end,
+  },
   { -- LSP Configuration & Plugins
     'neovim/nvim-lspconfig',
     dependencies = {
@@ -751,8 +761,46 @@ require('lazy').setup {
       local servers = {
         -- TODO : Add python and gopls
         -- clangd = {},
-        -- gopls = {},
-        -- pyright = {},
+        gopls = {
+          {
+            cmd = { 'gopls' },
+            filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
+            -- root_dir = util.root_pattern("go.work", "go.mod", ".git"),
+            settings = {
+              gopls = {
+                completeUnimported = true,
+                usePlaceholders = true,
+                analyses = {
+                  unusedparams = true,
+                },
+              },
+            },
+          },
+        },
+
+        pyright = {
+          settings = {
+            pyright = {
+              -- Using Ruff's import organizer
+              -- disableOrganizeImports = true,
+            },
+            python = {
+              analysis = {
+                -- Ignore all files for analysis to exclusively use Ruff for linting
+                -- ignore = { '*' },
+              },
+            },
+          },
+        },
+
+        -- ruff_lsp = {
+        --   init_options = {
+        --     settings = {
+        --       -- Any extra CLI arguments for `ruff` go here.
+        --       args = {},
+        --     },
+        --   },
+        -- },
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -821,7 +869,175 @@ require('lazy').setup {
       }
     end,
   },
+  { 'folke/neodev.nvim', opts = {} },
+  {
+    'rcarriga/nvim-dap-ui',
+    dependencies = {
+      'mfussenegger/nvim-dap',
+      'nvim-neotest/nvim-nio',
+      {
+        'rcarriga/cmp-dap',
+        dependencies = { 'nvim-cmp' },
+      },
+    },
+    config = function()
+      require('neodev').setup {
+        library = { plugins = { 'nvim-dap-ui' }, types = true },
+      }
 
+      require('cmp').setup.filetype({ 'dap-repl', 'dapui_watches', 'dapui_hover' }, {
+        sources = {
+          { name = 'dap' },
+        },
+      })
+
+      require('dapui').setup()
+      local dap, dapui = require 'dap', require 'dapui'
+      dap.listeners.before.attach.dapui_config = function()
+        dapui.open()
+      end
+      dap.listeners.before.launch.dapui_config = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated.dapui_config = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited.dapui_config = function()
+        dapui.close()
+      end
+
+      -- maps.n["<F5>"] = { function() require("dap").continue() end, desc = "Debugger: Start" }
+      vim.keymap.set('n', '<F5>', function()
+        dap.continue()
+      end, { desc = 'Debugger: Start' })
+
+      -- maps.n["<F17>"] = { function() require("dap").terminate() end, desc = "Debugger: Stop" } -- Shift+F5
+      vim.keymap.set('n', '<F17>', function()
+        dap.terminate()
+      end, { desc = 'Debugger: Start' })
+      -- maps.n["<F21>"] = { -- Shift+F9
+      --   function()
+      --     vim.ui.input({ prompt = "Condition: " }, function(condition)
+      --       if condition then require("dap").set_breakpoint(condition) end
+      --     end)
+      --   end,
+      --   desc = "Debugger: Conditional Breakpoint",
+      -- }
+      -- maps.n["<F29>"] = { function() require("dap").restart_frame() end, desc = "Debugger: Restart" } -- Control+F5
+      vim.keymap.set('n', '<F29>', function()
+        dap.restart_frame()
+      end, { desc = 'Debugger: Restart' })
+      -- maps.n["<F6>"] = { function() require("dap").pause() end, desc = "Debugger: Pause" }
+      vim.keymap.set('n', '<F6>', function()
+        dap.pause()
+      end, { desc = 'Debugger: Start' })
+      -- maps.n["<F9>"] = { function() require("dap").toggle_breakpoint() end, desc = "Debugger: Toggle Breakpoint" }
+      vim.keymap.set('n', '<F9>', function()
+        dap.toggle_breakpoint()
+      end, { desc = 'Debugger: Toggle Breakpoint' })
+
+      -- maps.n["<F10>"] = { function() require("dap").step_over() end, desc = "Debugger: Step Over" }
+      vim.keymap.set('n', '<F10>', function()
+        dap.step_over()
+      end, { desc = 'Debugger: Step Over' })
+
+      -- maps.n["<leader>di"] = { function() require("dap").step_into() end, desc = "Step Into (F11)" }
+      vim.keymap.set('n', '<leader>di', function()
+        dap.step_over()
+      end, { desc = 'Debugger: Step Over' })
+
+      -- maps.n["<F11>"] = { function() require("dap").step_into() end, desc = "Debugger: Step Into" }
+      vim.keymap.set('n', '<F11>', function()
+        dap.step_into()
+      end, { desc = 'Debugger: Step Into' })
+
+      -- maps.n["<F23>"] = { function() require("dap").step_out() end, desc = "Debugger: Step Out" } -- Shift+F11
+      vim.keymap.set('n', '<F23>', function()
+        dap.step_out()
+      end, { desc = 'Debugger: Step Over' })
+
+      -- maps.n["<leader>dO"] = { function() require("dap").step_out() end, desc = "Step Out (S-F11)" }
+      vim.keymap.set('n', '<leader>dO', function()
+        dap.step_out()
+      end, { desc = 'Debugger: Step Over' })
+      --
+      -- maps.n["<leader>do"] = { function() require("dap").step_over() end, desc = "Step Over (F10)" }
+      vim.keymap.set('n', '<leader>do', function()
+        dap.step_out()
+      end, { desc = 'Debugger: Step Over' })
+
+      -- maps.n["<leader>db"] = { function() require("dap").toggle_breakpoint() end, desc = "Toggle Breakpoint (F9)" }
+      vim.keymap.set('n', '<leader>db', function()
+        dap.toggle_breakpoint()
+      end, { desc = 'Debugger: Toggle Breakpoint' })
+      -- maps.n["<leader>dB"] = { function() require("dap").clear_breakpoints() end, desc = "Clear Breakpoints" }
+      vim.keymap.set('n', '<leader>dB', function()
+        dap.clear_breakpoints()
+      end, { desc = 'Debugger: Toggle Breakpoint' })
+
+      -- maps.n["<leader>dc"] = { function() require("dap").continue() end, desc = "Start/Continue (F5)" }
+      vim.keymap.set('n', '<leader>dc', function()
+        dap.continue()
+      end, { desc = 'Debugger: Continue' })
+
+      -- maps.n["<leader>dC"] = {
+      vim.keymap.set('n', '<leader>dC', function()
+        vim.ui.input({ prompt = 'Condition: ' }, function(condition)
+          if condition then
+            require('dap').set_breakpoint(condition)
+          end
+        end)
+      end, { desc = 'Conditional Breakpoint (S-F9)' })
+
+      -- maps.n["<leader>dq"] = { function() require("dap").close() end, desc = "Close Session" }
+      vim.keymap.set('n', '<leader>dq', function()
+        dap.close()
+      end, { desc = 'Debugger: Close session' })
+
+      -- maps.n["<leader>dQ"] = { function() require("dap").terminate() end, desc = "Terminate Session (S-F5)" }
+      vim.keymap.set('n', '<leader>dQ', function()
+        dap.terminate()
+      end, { desc = 'Debugger: Terminate' })
+
+      -- maps.n["<leader>dp"] = { function() require("dap").pause() end, desc = "Pause (F6)" }
+      vim.keymap.set('n', '<leader>dp', function()
+        dap.pause()
+      end, { desc = 'Debugger: Pause' })
+
+      -- maps.n["<leader>dr"] = { function() require("dap").restart_frame() end, desc = "Restart (C-F5)" }
+      vim.keymap.set('n', '<leader>df', function()
+        dap.restart_frame()
+      end, { desc = 'Debugger: Restart' })
+
+      -- maps.n["<leader>ds"] = { function() require("dap").run_to_cursor() end, desc = "Run To Cursor" }
+      vim.keymap.set('n', '<leader>ds', function()
+        dap.run_to_cursor()
+      end, { desc = 'Debugger: Run to cursor' })
+
+      vim.keymap.set('n', '<leader>dE', function()
+        vim.ui.input({ prompt = 'Expression: ' }, function(expr)
+          if expr then
+            require('dapui').eval(expr, { enter = true })
+          end
+        end)
+      end, { desc = 'Evaluate Input' })
+      --
+      --   maps.v["<leader>dE"] = { function() require("dapui").eval() end, desc = "Evaluate Input" }
+      vim.keymap.set('n', '<leader>dE', function()
+        dapui.eval()
+      end, { desc = 'Debugger: Evaluate input' })
+
+      --   maps.n["<leader>du"] = { function() require("dapui").toggle() end, desc = "Toggle Debugger UI" }
+      vim.keymap.set('n', '<leader>du', function()
+        dapui.toggle()
+      end, { desc = 'Debugger: Toggle debugger UI' })
+
+      --   maps.n["<leader>dh"] = { function() require("dap.ui.widgets").hover() end, desc = "Debugger Hover" }
+      vim.keymap.set('n', '<leader>dh', function()
+        dapui.hover()
+      end, { desc = 'Debugger: Debugger Hover' })
+    end,
+  },
   { -- Autoformat
     'stevearc/conform.nvim',
     opts = {
