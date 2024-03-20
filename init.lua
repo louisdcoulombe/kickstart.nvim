@@ -154,6 +154,14 @@ vim.opt.scrolloff = 10
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
+--
+vim.keymap.set('n', ']]', ']]zz', { desc = 'Recenter when moving block' })
+vim.keymap.set('n', '[[', '[[zz', { desc = 'Recenter when moving block' })
+
+vim.keymap.set('n', '<A-Right>', ':vertical resize +5<CR>', { desc = 'Recenter when moving block' })
+vim.keymap.set('n', '<A-Left>', ':vertical resize -5<CR>', { desc = 'Recenter when moving block' })
+vim.keymap.set('n', '<A-Up>', ':resize +5<CR>', { desc = 'Recenter when moving block' })
+vim.keymap.set('n', '<A-Down>', ':resize -5<CR>', { desc = 'Recenter when moving block' })
 
 -- ["<leader>d"] = {"[[\"_d]]", desc="Delete without affecting buffer"},
 vim.keymap.set('n', 'Y', 'y$', { desc = 'Yank remaining line' })
