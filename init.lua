@@ -172,7 +172,6 @@ vim.keymap.set('n', '<leader>Y', '[["+Y]]', { desc = 'Copy to clipboard (Y)' })
 vim.keymap.set('n', '<leader><tab>', ':bn<cr>', { desc = 'Next tab' })
 vim.keymap.set('n', '<leader>c', ':bd<cr>', { desc = 'Close active buffer' })
 vim.keymap.set('n', '<leader>C', ':%bd|e#', { desc = 'Close all but active buffer' })
--- :%bd|e#
 vim.keymap.set('v', '<leader>d', '[["_d]]', { desc = 'Delete without affecting buffer' })
 -- ["<leader>p"] = {"[[\"_dP]]", desc="Paste from clipboard"},
 -- ["<leader>y"] = {"[[\"+y]]", desc="Copy to clipboard"},
