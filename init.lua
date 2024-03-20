@@ -171,8 +171,8 @@ vim.keymap.set('n', '<leader>d', '[["_d]]', { desc = 'Delete without affecting b
 vim.keymap.set('n', '<leader>y', '[["+y]]', { desc = 'Copy to clipboard' })
 vim.keymap.set('n', '<leader>Y', '[["+Y]]', { desc = 'Copy to clipboard (Y)' })
 vim.keymap.set('n', '<leader><tab>', ':bn<cr>', { desc = 'Next tab' })
-vim.keymap.set('n', '<leader>c', ':bd<cr>', { desc = 'Close active buffer' })
-vim.keymap.set('n', '<leader>C', ':%bd|e#', { desc = 'Close all but active buffer' })
+vim.keymap.set('n', '<leader>x', ':bd<cr>', { desc = 'Close active buffer' })
+vim.keymap.set('n', '<leader>X', ':%bd|e#', { desc = 'Close all but active buffer' })
 vim.keymap.set('v', '<leader>d', '[["_d]]', { desc = 'Delete without affecting buffer' })
 -- ["<leader>p"] = {"[[\"_dP]]", desc="Paste from clipboard"},
 -- ["<leader>y"] = {"[[\"+y]]", desc="Copy to clipboard"},
@@ -258,6 +258,7 @@ require('lazy').setup {
   --  This is equivalent to:
   --    require('Comment').setup({})
 
+  -- p:: Comment
   {
     'numToStr/Comment.nvim',
     config = function()
@@ -286,7 +287,7 @@ require('lazy').setup {
     end,
   },
 
-  -- Harpoon
+  -- p:: Harpoond
   {
     'ThePrimeagen/harpoon',
     branch = 'harpoon2',
