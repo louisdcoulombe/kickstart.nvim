@@ -937,7 +937,7 @@ require('lazy').setup {
       -- maps.n["<F6>"] = { function() require("dap").pause() end, desc = "Debugger: Pause" }
       vim.keymap.set('n', '<F6>', function()
         dap.pause()
-      end, { desc = 'Debugger: Start' })
+      end, { desc = 'Debugger: Pause' })
       -- maps.n["<F9>"] = { function() require("dap").toggle_breakpoint() end, desc = "Debugger: Toggle Breakpoint" }
       vim.keymap.set('n', '<F9>', function()
         dap.toggle_breakpoint()
@@ -946,12 +946,12 @@ require('lazy').setup {
       -- maps.n["<F10>"] = { function() require("dap").step_over() end, desc = "Debugger: Step Over" }
       vim.keymap.set('n', '<F10>', function()
         dap.step_over()
-      end, { desc = 'Debugger: Step Over' })
+      end, { desc = 'Debugger: Step Over (F10)' })
 
       -- maps.n["<leader>di"] = { function() require("dap").step_into() end, desc = "Step Into (F11)" }
       vim.keymap.set('n', '<leader>di', function()
         dap.step_over()
-      end, { desc = 'Debugger: Step Over' })
+      end, { desc = 'Debugger: Step Over (F11)' })
 
       -- maps.n["<F11>"] = { function() require("dap").step_into() end, desc = "Debugger: Step Into" }
       vim.keymap.set('n', '<F11>', function()
@@ -961,17 +961,17 @@ require('lazy').setup {
       -- maps.n["<F23>"] = { function() require("dap").step_out() end, desc = "Debugger: Step Out" } -- Shift+F11
       vim.keymap.set('n', '<F23>', function()
         dap.step_out()
-      end, { desc = 'Debugger: Step Over' })
+      end, { desc = 'Debugger: Step Out' })
 
       -- maps.n["<leader>dO"] = { function() require("dap").step_out() end, desc = "Step Out (S-F11)" }
       vim.keymap.set('n', '<leader>dO', function()
         dap.step_out()
-      end, { desc = 'Debugger: Step Over' })
+      end, { desc = 'Debugger: Step Over (S-F11)' })
       --
       -- maps.n["<leader>do"] = { function() require("dap").step_over() end, desc = "Step Over (F10)" }
       vim.keymap.set('n', '<leader>do', function()
         dap.step_out()
-      end, { desc = 'Debugger: Step Over' })
+      end, { desc = 'Debugger: Step Over (F10)' })
 
       -- maps.n["<leader>db"] = { function() require("dap").toggle_breakpoint() end, desc = "Toggle Breakpoint (F9)" }
       vim.keymap.set('n', '<leader>db', function()
@@ -985,7 +985,7 @@ require('lazy').setup {
       -- maps.n["<leader>dc"] = { function() require("dap").continue() end, desc = "Start/Continue (F5)" }
       vim.keymap.set('n', '<leader>dc', function()
         dap.continue()
-      end, { desc = 'Debugger: Continue' })
+      end, { desc = 'Debugger: Continue (F5)' })
 
       -- maps.n["<leader>dC"] = {
       vim.keymap.set('n', '<leader>dC', function()
@@ -1004,17 +1004,17 @@ require('lazy').setup {
       -- maps.n["<leader>dQ"] = { function() require("dap").terminate() end, desc = "Terminate Session (S-F5)" }
       vim.keymap.set('n', '<leader>dQ', function()
         dap.terminate()
-      end, { desc = 'Debugger: Terminate' })
+      end, { desc = 'Debugger: Terminate (S-F5)' })
 
       -- maps.n["<leader>dp"] = { function() require("dap").pause() end, desc = "Pause (F6)" }
       vim.keymap.set('n', '<leader>dp', function()
         dap.pause()
-      end, { desc = 'Debugger: Pause' })
+      end, { desc = 'Debugger: Pause (F6)' })
 
       -- maps.n["<leader>dr"] = { function() require("dap").restart_frame() end, desc = "Restart (C-F5)" }
       vim.keymap.set('n', '<leader>df', function()
         dap.restart_frame()
-      end, { desc = 'Debugger: Restart' })
+      end, { desc = 'Debugger: Restart (C-F5)' })
 
       -- maps.n["<leader>ds"] = { function() require("dap").run_to_cursor() end, desc = "Run To Cursor" }
       vim.keymap.set('n', '<leader>ds', function()
