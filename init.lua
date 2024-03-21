@@ -616,6 +616,10 @@ require('lazy').setup {
     end,
   },
   {
+    'mfussenegger/nvim-dap',
+    config = function() end,
+  },
+  {
     'jay-babu/mason-nvim-dap.nvim',
     dependencies = {
       'williamboman/mason.nvim',
@@ -623,7 +627,10 @@ require('lazy').setup {
     },
     config = function()
       require('mason').setup()
-      require('mason-nvim-dap').setup()
+      require('mason-nvim-dap').setup {
+        ensure_installed = { 'stylua', 'debugpy', 'delve' },
+        handlers = {}, -- sets up dap in the predefined manner
+      }
     end,
   },
   { -- LSP Configuration & Plugins
