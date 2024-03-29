@@ -922,14 +922,7 @@ require('lazy').setup {
       vim.keymap.set('n', '<F17>', function()
         dap.terminate()
       end, { desc = 'Debugger: Start' })
-      -- maps.n["<F21>"] = { -- Shift+F9
-      --   function()
-      --     vim.ui.input({ prompt = "Condition: " }, function(condition)
-      --       if condition then require("dap").set_breakpoint(condition) end
-      --     end)
-      --   end,
-      --   desc = "Debugger: Conditional Breakpoint",
-      -- }
+
       -- maps.n["<F29>"] = { function() require("dap").restart_frame() end, desc = "Debugger: Restart" } -- Control+F5
       vim.keymap.set('n', '<F29>', function()
         dap.restart_frame()
