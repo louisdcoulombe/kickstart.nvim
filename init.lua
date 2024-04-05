@@ -452,6 +452,14 @@ require('lazy').setup {
       nt.setup {}
 
       vim.keymap.set('n', '<leader>e', ':Neotree toggle<cr>', { desc = 'Toggle neotree' })
+
+      vim.keymap.set('n', '<leader>o', function()
+        if vim.bo.filetype == 'neo-tree' then
+          vim.cmd.wincmd 'p'
+        else
+          vim.cmd.Neotree 'focus'
+        end
+      end, { desc = 'Toggle neotree' })
     end,
     init = function()
       if vim.fn.argc(-1) == 1 then
