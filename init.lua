@@ -574,8 +574,8 @@ require('lazy').setup {
       vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = '[F]ind Buffers' })
       vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = '[F]ind [H]elp' })
       vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = '[F]ind [K]eymaps' })
-      vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = '[F]ind [F]iles' })
-      vim.keymap.set('n', '<leader>fF', function()
+      vim.keymap.set('n', '<leader>fF', builtin.find_files, { desc = '[F]ind [F]iles' })
+      vim.keymap.set('n', '<leader>ff', function()
         require('telescope.builtin').find_files { hidden = true, no_ignore = true }
       end, { desc = 'Find all files' })
       -- vim.keymap.set('n', '<leader>fs', builtin.builtin, { desc = '[F]ind [S]elect Telescope' })
