@@ -171,8 +171,9 @@ vim.keymap.set('n', '<leader>p', '[["_dP]]', { desc = 'Paste from clipboard' })
 vim.keymap.set('n', '<leader>y', '[["+y]]', { desc = 'Copy to clipboard' })
 vim.keymap.set('n', '<leader>Y', '[["+Y]]', { desc = 'Copy to clipboard (Y)' })
 vim.keymap.set('n', '<leader><tab>', ':bn<cr>', { desc = 'Next tab' })
-vim.keymap.set('n', '<leader>x', ':bd<cr>', { desc = 'Close active buffer' })
-vim.keymap.set('n', '<leader>X', ':%bd|e#', { desc = 'Close all but active buffer' })
+vim.keymap.set('n', '<leader>`', ':bp<cr>', { desc = 'Next tab' })
+vim.keymap.set('n', '<leader>d', ':bd<cr>', { desc = 'Close active buffer' })
+vim.keymap.set('n', '<leader>D', ':%bd|e#', { desc = 'Close all but active buffer' })
 vim.keymap.set('v', '<leader>d', '[["_d]]', { desc = 'Delete without affecting buffer' })
 -- ["<leader>p"] = {"[[\"_dP]]", desc="Paste from clipboard"},
 -- ["<leader>y"] = {"[[\"+y]]", desc="Copy to clipboard"},
@@ -264,16 +265,11 @@ require('lazy').setup {
     config = function()
       local cm = require 'Comment.api'
 
-      vim.keymap.set('n', '<leader>/', function()
+      vim.keymap.set('n', 'gc', function()
         cm.toggle.linewise.count(vim.v.count > 0 and vim.v.count or 1)
       end, { desc = 'Toggle comment line' })
 
-      vim.keymap.set(
-        'v',
-        '<leader>/',
-        "<esc><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<cr>",
-        { desc = 'Toggle comment for selection' }
-      )
+      vim.keymap.set('v', 'gc', "<esc><cmd>lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<cr>", { desc = 'Toggle comment for selection' })
     end,
   },
   -- p:: Bufferline
@@ -447,59 +443,6 @@ require('lazy').setup {
       }
     end,
   },
-  {
-    'nvim-neo-tree/neo-tree.nvim',
-    branch = 'v3.x',
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
-      'MunifTanjim/nui.nvim',
-      -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
-    },
-    config = function()
-      local nt = require 'neo-tree'
-      nt.setup {}
-
-      -- vim.keymap.set('n', '<leader>e', ':Neotree reveal<cr>', { desc = 'Toggle neotree' })
-      vim.keymap.set('n', '<leader>e', function()
-        if vim.bo.filetype == 'neo-tree' then
-          -- vim.cmd.wincmd 'p'
-          vim.cmd.Neotree 'toggle'
-        else
-          vim.cmd.Neotree 'reveal'
-        end
-      end, { desc = 'Toggle neotree' })
-
-      vim.keymap.set('n', '<leader>o', function()
-        if vim.bo.filetype == 'neo-tree' then
-          vim.cmd.wincmd 'p'
-        else
-          vim.cmd.Neotree 'focus'
-        end
-      end, { desc = 'Toggle neotree' })
-    end,
-
-    init = function()
-      if vim.fn.argc(-1) == 1 then
-        local stat = vim.loop.fs_stat(vim.fn.argv(0))
-        if stat and stat.type == 'directory' then
-          require('neo-tree').setup {
-            filesystem = {
-              hijack_netrw_behavior = 'open_current',
-            },
-          }
-        end
-      end
-    end,
-  },
-
-  -- NOTE: Plugins can specify dependencies.
-  --
-  -- The dependencies are proper plugin specifications as well - anything
-  -- you do for a plugin at the top level, you can do for a dependency.
-  --
-  -- Use the `dependencies` key to specify the dependencies of a particular plugin
-
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
@@ -520,11 +463,7 @@ require('lazy').setup {
         end,
       },
       { 'nvim-telescope/telescope-ui-select.nvim' },
-
-      -- Useful for getting pretty icons, but requires special font.
-      --  If you already have a Nerd Font, or terminal set up with fallback fonts
-      --  you can enable this
-      -- { 'nvim-tree/nvim-web-devicons' }
+      { 'nvim-tree/nvim-web-devicons' },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -577,9 +516,9 @@ require('lazy').setup {
       pcall(require('telescope').load_extension, 'fzf')
       pcall(require('telescope').load_extension, 'ui-select')
 
-      -- See `:help telescope.builtin`
+      -- Telescope::find
       local builtin = require 'telescope.builtin'
-      -- maps.n["<leader>fb"] = { function() require("telescope.builtin").buffers() end, desc = "Find buffers" }
+      vim.keymap.set('n', '<leader>fm', builtin.marks, { desc = '[F]ind Marks' })
       vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = '[F]ind Buffers' })
       vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = '[F]ind [H]elp' })
       vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = '[F]ind [K]eymaps' })
@@ -587,7 +526,6 @@ require('lazy').setup {
       vim.keymap.set('n', '<leader>fF', function()
         require('telescope.builtin').find_files { hidden = true, no_ignore = true }
       end, { desc = 'Find all files' })
-      -- vim.keymap.set('n', '<leader>fs', builtin.builtin, { desc = '[F]ind [S]elect Telescope' })
       vim.keymap.set('n', '<leader>fw', builtin.grep_string, { desc = '[F]ind current [W]ord' })
       vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = '[F]ind by [G]rep' })
       vim.keymap.set('n', '<leader>fG', function()
@@ -602,6 +540,8 @@ require('lazy').setup {
       vim.keymap.set('n', '<leader>f.', builtin.oldfiles, { desc = '[F]ind Recent Files ("." for repeat)' })
       vim.keymap.set('n', "<leader>f'", builtin.marks, { desc = '[F]ind marks' })
 
+      -- Telescope::Git
+      vim.keymap.set('n', '<leader>gt', builtin.git_status, { desc = '[F]ind Git S[t]atus' })
       vim.keymap.set('n', '<leader>gf', builtin.git_files, { desc = '[F]ind git files' })
       vim.keymap.set('n', '<leader>gb', function()
         builtin.git_branches { use_file_path = true }
@@ -613,18 +553,14 @@ require('lazy').setup {
         builtin.git_bcommits { use_file_path = true }
       end, { desc = 'Git commits' })
 
-      -- maps.n["<leader>f'"] = { function() require("telescope.builtin").marks() end, desc = "Find marks" }
-      vim.keymap.set('n', '<leader><leader>', builtin.resume, { desc = 'Telescope: Resume previous search' })
-      -- maps.n["<leader>f<CR>"] = { function() require("telescope.builtin").resume() end, desc = "Resume previous search" }
-
       -- Slightly advanced example of overriding default behavior and theme
-      vim.keymap.set('n', '<leader>b/', function()
+      vim.keymap.set('n', '<leader><leader>', function()
         -- You can pass additional configuration to telescope to change theme, layout, etc.
         builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
           winblend = 10,
           previewer = false,
         })
-      end, { desc = '[b/] Fuzzily search in current buffer' })
+      end, { desc = '[space space] Fuzzily search in current buffer' })
 
       -- Also possible to pass additional configuration options.
       --  See `:help telescope.builtin.live_grep()` for information about particular keys
@@ -714,6 +650,7 @@ require('lazy').setup {
             vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
 
+          map('<leader>lt', require('telescope.builtin').treesitter, 'Treesitter')
           map('<leader>le', require('telescope.builtin').diagnostics, '[G]oto [D]efinition')
           -- Jump to the definition of the word under your cursor.
           --  This is where a variable was first declared, or where a function is defined, etc.
@@ -1278,10 +1215,198 @@ require('lazy').setup {
     },
     config = function()
       require('go').setup()
+
+      vim.keymap.set('v', '<leader>xt', ':GoFillStruct<cr>', { desc = 'GoFillStruct' })
+      vim.keymap.set('v', '<leader>xe', ':GoIfErr<cr>', { desc = 'GoFillStruct' })
     end,
     event = { 'CmdlineEnter' },
     ft = { 'go', 'gomod' },
     build = ':lua require("go.install").update_all_sync()', -- if you need to install/update all binaries
+  },
+  {
+    'stevearc/oil.nvim',
+    opts = {},
+    -- Optional dependencies
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      vim.keymap.set('n', '<leader>e', ':Oil<cr>', { desc = 'File [E]xplorer (Oil)' })
+
+      require('oil').setup {
+        -- Oil will take over directory buffers (e.g. `vim .` or `:e src/`)
+        -- Set to false if you still want to use netrw.
+        default_file_explorer = true,
+        -- Id is automatically added at the beginning, and name at the end
+        -- See :help oil-columns
+        columns = {
+          'icon',
+          -- "permissions",
+          -- "size",
+          -- "mtime",
+        },
+        -- Buffer-local options to use for oil buffers
+        buf_options = {
+          buflisted = false,
+          bufhidden = 'hide',
+        },
+        -- Window-local options to use for oil buffers
+        win_options = {
+          wrap = false,
+          signcolumn = 'no',
+          cursorcolumn = false,
+          foldcolumn = '0',
+          spell = false,
+          list = false,
+          conceallevel = 3,
+          concealcursor = 'nvic',
+        },
+        -- Send deleted files to the trash instead of permanently deleting them (:help oil-trash)
+        delete_to_trash = false,
+        -- Skip the confirmation popup for simple operations (:help oil.skip_confirm_for_simple_edits)
+        skip_confirm_for_simple_edits = false,
+        -- Selecting a new/moved/renamed file or directory will prompt you to save changes first
+        -- (:help prompt_save_on_select_new_entry)
+        prompt_save_on_select_new_entry = true,
+        -- Oil will automatically delete hidden buffers after this delay
+        -- You can set the delay to false to disable cleanup entirely
+        -- Note that the cleanup process only starts when none of the oil buffers are currently displayed
+        cleanup_delay_ms = 2000,
+        lsp_file_methods = {
+          -- Time to wait for LSP file operations to complete before skipping
+          timeout_ms = 1000,
+          -- Set to true to autosave buffers that are updated with LSP willRenameFiles
+          -- Set to "unmodified" to only save unmodified buffers
+          autosave_changes = false,
+        },
+        -- Constrain the cursor to the editable parts of the oil buffer
+        -- Set to `false` to disable, or "name" to keep it on the file names
+        constrain_cursor = 'editable',
+        -- Set to true to watch the filesystem for changes and reload oil
+        experimental_watch_for_changes = false,
+        -- Keymaps in oil buffer. Can be any value that `vim.keymap.set` accepts OR a table of keymap
+        -- options with a `callback` (e.g. { callback = function() ... end, desc = "", mode = "n" })
+        -- Additionally, if it is a string that matches "actions.<name>",
+        -- it will use the mapping at require("oil.actions").<name>
+        -- Set to `false` to remove a keymap
+        -- See :help oil-actions for a list of all available actions
+        keymaps = {
+          ['g?'] = 'actions.show_help',
+          ['<CR>'] = 'actions.select',
+          ['<C-v>'] = 'actions.select_vsplit',
+          ['<C-h>'] = 'actions.select_split',
+          ['<C-t>'] = 'actions.select_tab',
+          ['gp'] = 'actions.preview',
+          ['<leader>e'] = 'actions.close',
+          ['<C-l>'] = 'actions.refresh',
+          ['-'] = 'actions.parent',
+          ['_'] = 'actions.open_cwd',
+          ['`'] = 'actions.cd',
+          ['~'] = 'actions.tcd',
+          ['gs'] = 'actions.change_sort',
+          ['gx'] = 'actions.open_external',
+          ['H'] = 'actions.toggle_hidden',
+          ['g\\'] = 'actions.toggle_trash',
+        },
+        -- Configuration for the floating keymaps help window
+        keymaps_help = {
+          border = 'rounded',
+        },
+        -- Set to false to disable all of the above keymaps
+        use_default_keymaps = true,
+        view_options = {
+          -- Show files and directories that start with "."
+          show_hidden = false,
+          -- This function defines what is considered a "hidden" file
+          is_hidden_file = function(name, bufnr)
+            return vim.startswith(name, '.')
+          end,
+          -- This function defines what will never be shown, even when `show_hidden` is set
+          is_always_hidden = function(name, bufnr)
+            return false
+          end,
+          -- Sort file names in a more intuitive order for humans. Is less performant,
+          -- so you may want to set to false if you work with large directories.
+          natural_order = true,
+          sort = {
+            -- sort order can be "asc" or "desc"
+            -- see :help oil-columns to see which columns are sortable
+            { 'type', 'asc' },
+            { 'name', 'asc' },
+          },
+        },
+        -- EXPERIMENTAL support for performing file operations with git
+        git = {
+          -- Return true to automatically git add/mv/rm files
+          add = function(path)
+            return false
+          end,
+          mv = function(src_path, dest_path)
+            return false
+          end,
+          rm = function(path)
+            return false
+          end,
+        },
+        -- Configuration for the floating window in oil.open_float
+        float = {
+          -- Padding around the floating window
+          padding = 2,
+          max_width = 0,
+          max_height = 0,
+          border = 'rounded',
+          win_options = {
+            winblend = 0,
+          },
+          -- This is the config that will be passed to nvim_open_win.
+          -- Change values here to customize the layout
+          override = function(conf)
+            return conf
+          end,
+        },
+        -- Configuration for the actions floating preview window
+        preview = {
+          -- Width dimensions can be integers or a float between 0 and 1 (e.g. 0.4 for 40%)
+          -- min_width and max_width can be a single value or a list of mixed integer/float types.
+          -- max_width = {100, 0.8} means "the lesser of 100 columns or 80% of total"
+          max_width = 0.9,
+          -- min_width = {40, 0.4} means "the greater of 40 columns or 40% of total"
+          min_width = { 40, 0.4 },
+          -- optionally define an integer/float for the exact width of the preview window
+          width = nil,
+          -- Height dimensions can be integers or a float between 0 and 1 (e.g. 0.4 for 40%)
+          -- min_height and max_height can be a single value or a list of mixed integer/float types.
+          -- max_height = {80, 0.9} means "the lesser of 80 columns or 90% of total"
+          max_height = 0.9,
+          -- min_height = {5, 0.1} means "the greater of 5 columns or 10% of total"
+          min_height = { 5, 0.1 },
+          -- optionally define an integer/float for the exact height of the preview window
+          height = nil,
+          border = 'rounded',
+          win_options = {
+            winblend = 0,
+          },
+          -- Whether the preview window is automatically updated when the cursor is moved
+          update_on_cursor_moved = true,
+        },
+        -- Configuration for the floating progress window
+        progress = {
+          max_width = 0.9,
+          min_width = { 40, 0.4 },
+          width = nil,
+          max_height = { 10, 0.9 },
+          min_height = { 5, 0.1 },
+          height = nil,
+          border = 'rounded',
+          minimized_border = 'none',
+          win_options = {
+            winblend = 0,
+          },
+        },
+        -- Configuration for the floating SSH window
+        ssh = {
+          border = 'rounded',
+        },
+      }
+    end,
   },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
@@ -1306,3 +1431,4 @@ require('lazy').setup {
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+-- IfErr
