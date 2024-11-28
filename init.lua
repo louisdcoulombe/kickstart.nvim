@@ -20,9 +20,6 @@
 =====================================================================
 =====================================================================
 
-TODO: Install golang and python lsp
-TODO: Install dap for golang and python
-
 
 What is Kickstart?
 
@@ -172,18 +169,20 @@ vim.keymap.set('n', '<leader>p', '[["_dP]]', { desc = 'Paste from clipboard' })
 vim.keymap.set('n', '<leader>y', '[["+y]]', { desc = 'Copy to clipboard' })
 vim.keymap.set('n', '<leader>Y', '[["+Y]]', { desc = 'Copy to clipboard (Y)' })
 vim.keymap.set('n', '<leader><tab>', ':bn<cr>', { desc = 'Next tab' })
-vim.keymap.set('n', '<leader>`', ':bp<cr>', { desc = 'Next tab' })
+vim.keymap.set('n', '<leader>`', ':bp<cr>', { desc = 'Previous tab' })
 vim.keymap.set('n', '<leader>d', ':bd<cr>', { desc = 'Close active buffer' })
 vim.keymap.set('n', '<leader>D', ':%bd|e#', { desc = 'Close all but active buffer' })
 vim.keymap.set('v', '<leader>d', '[["_d]]', { desc = 'Delete without affecting buffer' })
+vim.keymap.set('n', '<leader>xj', ":%!jq '.'", { desc = 'Format JSON' })
 -- ["<leader>p"] = {"[[\"_dP]]", desc="Paste from clipboard"},
 -- ["<leader>y"] = {"[[\"+y]]", desc="Copy to clipboard"},
--- ["<leader>Y"] = {"[[\"+Y]]", desc="Copy to clipboard (Y)"},
+--
+-- ["<leaderapplication_idY"] = application_state
 -- ["<leader>xm"] = {":MarkdownPreview<cr>", desc="MarkdownPreview"},
 --
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
-vim.opt.hlsearch = true
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+-- vim.opt.hlsearch = true
+-- vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>%(application_id)s
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
@@ -298,7 +297,7 @@ require('lazy').setup {
         harpoon:list():append()
       end, { desc = 'Harpoon: Add' })
 
-      vim.keymap.set('n', '<C-e>', function()
+      vim.keymap.set('n', '<leader>A', function()
         harpoon.ui:toggle_quick_menu(harpoon:list())
       end, { desc = 'Harpoon toggle UI' })
 
@@ -317,6 +316,14 @@ require('lazy').setup {
       vim.keymap.set('n', '<leader>4', function()
         harpoon:list():select(4)
       end, { desc = 'Harpoon: 4' })
+
+      vim.keymap.set('n', '<leader>5', function()
+        harpoon:list():select(5)
+      end, { desc = 'Harpoon: 5' })
+
+      vim.keymap.set('n', '<leader>6', function()
+        harpoon:list():select(6)
+      end, { desc = 'Harpoon: 6' })
     end,
   },
   {
@@ -441,6 +448,7 @@ require('lazy').setup {
         ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
         ['<leader>x'] = { name = '[X]custom', _ = 'which_key_ignore' },
+        ['<leader>r'] = { name = 'Refactor', _ = 'which_key_ignore' },
       }
     end,
   },
@@ -553,6 +561,7 @@ require('lazy').setup {
       vim.keymap.set('n', '<leader>gm', function()
         builtin.git_bcommits { use_file_path = true }
       end, { desc = 'Git commits' })
+      vim.keymap.set('n', '<leader>gP', ':!git push<cr>', { desc = '[G]it [P]ush to remote' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader><leader>', function()
@@ -783,7 +792,11 @@ require('lazy').setup {
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        -- tsserver = {},
+        tsserver = {},
+        html = {},
+        cssls = {},
+        tailwindcss = {},
+        emmet_ls = {},
         --
 
         lua_ls = {
@@ -827,6 +840,11 @@ require('lazy').setup {
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format lua code
+        'prettier', -- prettier formatter
+        'isort', -- python formatter
+        'black', -- python formatter
+        'pylint', -- python linter
+        'eslint_d', -- js linter
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -1122,6 +1140,7 @@ require('lazy').setup {
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'path' },
+          { name = 'vim-dadbod-completion', priority = 700 }, -- for dbui
         },
       }
     end,
@@ -1192,7 +1211,7 @@ require('lazy').setup {
 
       ---@diagnostic disable-next-line: missing-fields
       require('nvim-treesitter.configs').setup {
-        ensure_installed = { 'bash', 'c', 'html', 'lua', 'markdown', 'vim', 'vimdoc', 'go', 'python' },
+        ensure_installed = { 'bash', 'c', 'html', 'lua', 'markdown', 'vim', 'vimdoc', 'go', 'python', 'json', 'yaml' },
         -- Autoinstall languages that are not installed
         auto_install = true,
         highlight = { enable = true },
@@ -1407,6 +1426,52 @@ require('lazy').setup {
           border = 'rounded',
         },
       }
+    end,
+  },
+  {
+    'ThePrimeagen/refactoring.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-treesitter/nvim-treesitter',
+    },
+    config = function()
+      require('refactoring').setup()
+
+      vim.keymap.set({ 'n', 'x' }, '<leader>rr', function()
+        require('refactoring').select_refactor()
+      end, { desc = 'Refactoring' })
+    end,
+  },
+  {
+    'kristijanhusak/vim-dadbod-ui',
+    dependencies = {
+      { 'tpope/vim-dadbod', lazy = true },
+      { 'kristijanhusak/vim-dadbod-completion', ft = { 'sql', 'mysql', 'plsql' }, lazy = true },
+    },
+    cmd = {
+      'DBUI',
+      'DBUIToggle',
+      'DBUIAddConnection',
+      'DBUIFindBuffer',
+    },
+    init = function()
+      -- Your DBUI configuration
+      vim.g.db_ui_use_nerd_fonts = 1
+    end,
+  },
+  {
+    'b0o/incline.nvim',
+    config = function()
+      require('incline').setup()
+    end,
+    -- Optional: Lazy load Incline
+    event = 'VeryLazy',
+  },
+  {
+    'smjonas/inc-rename.nvim',
+    config = function()
+      require('inc_rename').setup()
+      vim.keymap.set('n', '<leader>rn', ':IncRename ', { desc = 'Rename' })
     end,
   },
 
