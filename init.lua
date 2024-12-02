@@ -151,6 +151,45 @@ vim.opt.colorcolumn = '120'
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+local colorMap = {
+  sumiInk1 = '#1F1F28',
+  sumiInk3 = '#363646',
+  sumiInk4 = '#54546D',
+  waveBlue1 = '#223249',
+  waveBlue2 = '#2D4F67',
+  winterGreen = '#2B3328',
+  winterYellow = '#49443C',
+  winterRed = '#43242B',
+  winterBlue = '#252535',
+  autumnGreen = '#76946A',
+  autumnRed = '#C34043',
+  autumnYellow = '#DCA561',
+  samuraiRed = '#E82424',
+  roninYellow = '#FF9E3B',
+  waveAqua1 = '#6A9589',
+  dragonBlue = '#658594',
+  fujiGray = '#727169',
+  springViolet1 = '#938AA9',
+  oniViolet = '#957FB8',
+  crystalBlue = '#7E9CD8',
+  springViolet2 = '#9CABCA',
+  springBlue = '#7FB4CA',
+  lightBlue = '#A3D4D5',
+  waveAqua2 = '#7AA89F',
+  springGreen = '#98BB6C',
+  boatYellow1 = '#938056',
+  boatYellow2 = '#C0A36E',
+  carpYellow = '#E6C384',
+  sakuraPink = '#D27E99',
+  waveRed = '#E46876',
+  peachRed = '#FF5D62',
+  surimiOrange = '#FFA066',
+  katanaGray = '#717C7C',
+  backgroundMedium = '#2a2a37',
+  -- Used for the terminal
+  backgroundDark = '#15151c',
+}
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 --
@@ -174,6 +213,22 @@ vim.keymap.set('n', '<leader>d', ':bd<cr>', { desc = 'Close active buffer' })
 vim.keymap.set('n', '<leader>D', ':%bd|e#', { desc = 'Close all but active buffer' })
 vim.keymap.set('v', '<leader>d', '[["_d]]', { desc = 'Delete without affecting buffer' })
 vim.keymap.set('n', '<leader>xj', ":%!jq '.'", { desc = 'Format JSON' })
+
+-- Run test file if it's a test_ otherwise run pytest in folder
+-- vim.keymap.set('n', '<leader>xt', function()
+--   local fn = vim.fn.expand '%:p'
+--   if string.find(fn, 'test_') then
+--     vim.api.nvim_command '!pytest %<cr>'
+--   else
+--     local str = '!pytest ' .. vim.fn.expand '%:h' .. '<cr>'
+--     print(str)
+--     vim.api.nvim_command(str)
+--   end
+-- end, { desc = 'Run test file' })
+
+vim.keymap.set('n', '<leader>xt', ':!pytest %<cr>', { desc = 'Run test file' })
+vim.keymap.set('n', '<leader>x1', ':!python3 % --p 0<cr>', { desc = 'Run Part 1' })
+vim.keymap.set('n', '<leader>x2', ':!python3 % --p 1<cr>', { desc = 'Run Part 2' })
 -- ["<leader>p"] = {"[[\"_dP]]", desc="Paste from clipboard"},
 -- ["<leader>y"] = {"[[\"+y]]", desc="Copy to clipboard"},
 --
@@ -294,7 +349,7 @@ require('lazy').setup {
       harpoon.setup()
 
       vim.keymap.set('n', '<leader>a', function()
-        harpoon:list():append()
+        harpoon:list():add()
       end, { desc = 'Harpoon: Add' })
 
       vim.keymap.set('n', '<leader>A', function()
@@ -448,6 +503,7 @@ require('lazy').setup {
         ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
         ['<leader>x'] = { name = '[X]custom', _ = 'which_key_ignore' },
+        ['<leader>t'] = { name = '[T]ests', _ = 'which_key_ignore' },
       }
     end,
   },
@@ -791,7 +847,8 @@ require('lazy').setup {
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        tsserver = {},
+        -- tsserver = {},
+        -- typescript-language-server = {},
         html = {},
         cssls = {},
         tailwindcss = {},
@@ -1235,8 +1292,8 @@ require('lazy').setup {
     config = function()
       require('go').setup()
 
-      vim.keymap.set('v', '<leader>xt', ':GoFillStruct<cr>', { desc = 'GoFillStruct' })
-      vim.keymap.set('v', '<leader>xe', ':GoIfErr<cr>', { desc = 'GoFillStruct' })
+      vim.keymap.set('v', '<leader>xf', ':GoFillStruct<cr>', { desc = 'go: GoFillStruct' })
+      vim.keymap.set('v', '<leader>xe', ':GoIfErr<cr>', { desc = 'go: if err' })
     end,
     event = { 'CmdlineEnter' },
     ft = { 'go', 'gomod' },
@@ -1473,7 +1530,165 @@ require('lazy').setup {
       vim.keymap.set('n', '<leader>rn', ':IncRename ', { desc = 'Rename' })
     end,
   },
+  {
+    'nvim-neotest/neotest',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-treesitter/nvim-treesitter',
+      'antoinemadec/FixCursorHold.nvim',
+      'marilari88/neotest-vitest',
+      'nvim-neotest/neotest-go',
+      'nvim-neotest/neotest-python',
+    },
+    config = function()
+      local neotest = require 'neotest'
+      local map_opts = { noremap = true, silent = true, nowait = true }
 
+      -- get neotest namespace (api call creates or returns namespace)
+      local neotest_ns = vim.api.nvim_create_namespace 'neotest'
+      vim.diagnostic.config({
+        virtual_text = {
+          format = function(diagnostic)
+            local message = diagnostic.message:gsub('\n', ' '):gsub('\t', ' '):gsub('%s+', ' '):gsub('^%s+', '')
+            return message
+          end,
+        },
+      }, neotest_ns)
+
+      require('neotest').setup {
+        quickfix = {
+          open = false,
+          enabled = false,
+        },
+        status = {
+          enabled = true,
+          signs = true, -- Sign after function signature
+          virtual_text = false,
+        },
+        icons = {
+          child_indent = '│',
+          child_prefix = '├',
+          collapsed = '─',
+          expanded = '╮',
+          failed = '✘',
+          final_child_indent = ' ',
+          final_child_prefix = '╰',
+          non_collapsible = '─',
+          passed = '✓',
+          running = '',
+          running_animated = { '/', '|', '\\', '-', '/', '|', '\\', '-' },
+          skipped = '↓',
+          unknown = '',
+        },
+        floating = {
+          border = 'rounded',
+          max_height = 0.9,
+          max_width = 0.9,
+          options = {},
+        },
+        summary = {
+          open = 'botright vsplit | vertical resize 60',
+          mappings = {
+            attach = 'a',
+            clear_marked = 'M',
+            clear_target = 'T',
+            debug = 'd',
+            debug_marked = 'D',
+            expand = { '<CR>', '<2-LeftMouse>' },
+            expand_all = 'e',
+            jumpto = 'i',
+            mark = 'm',
+            next_failed = 'J',
+            output = 'o',
+            prev_failed = 'K',
+            run = 'r',
+            run_marked = 'R',
+            short = 'O',
+            stop = 'u',
+            target = 't',
+            watch = 'w',
+          },
+        },
+        highlights = {
+          adapter_name = 'NeotestAdapterName',
+          border = 'NeotestBorder',
+          dir = 'NeotestDir',
+          expand_marker = 'NeotestExpandMarker',
+          failed = 'NeotestFailed',
+          file = 'NeotestFile',
+          focused = 'NeotestFocused',
+          indent = 'NeotestIndent',
+          marked = 'NeotestMarked',
+          namespace = 'NeotestNamespace',
+          passed = 'NeotestPassed',
+          running = 'NeotestRunning',
+          select_win = 'NeotestWinSelect',
+          skipped = 'NeotestSkipped',
+          target = 'NeotestTarget',
+          test = 'NeotestTest',
+          unknown = 'NeotestUnknown',
+        },
+        adapters = {
+          require 'neotest-vitest',
+          require 'neotest-go',
+        },
+      }
+
+      vim.api.nvim_set_hl(0, 'NeotestBorder', { fg = colorMap.fujiGray })
+      vim.api.nvim_set_hl(0, 'NeotestIndent', { fg = colorMap.fujiGray })
+      vim.api.nvim_set_hl(0, 'NeotestExpandMarker', { fg = colorMap.fujiGray })
+      vim.api.nvim_set_hl(0, 'NeotestDir', { fg = colorMap.fujiGray })
+      vim.api.nvim_set_hl(0, 'NeotestFile', { fg = colorMap.fujiGray })
+      vim.api.nvim_set_hl(0, 'NeotestFailed', { fg = colorMap.samuraiRed })
+      vim.api.nvim_set_hl(0, 'NeotestPassed', { fg = colorMap.springGreen })
+      vim.api.nvim_set_hl(0, 'NeotestSkipped', { fg = colorMap.fujiGray })
+      vim.api.nvim_set_hl(0, 'NeotestRunning', { fg = colorMap.carpYellow })
+      vim.api.nvim_set_hl(0, 'NeotestNamespace', { fg = colorMap.crystalBlue })
+      vim.api.nvim_set_hl(0, 'NeotestAdapterName', { fg = colorMap.oniViolet })
+
+      map_opts['desc'] = 'Test file'
+      vim.keymap.set('n', '<localleader>tfr', function()
+        neotest.run.run(vim.fn.expand '%')
+      end, map_opts)
+
+      map_opts['desc'] = 'Test nearest'
+      vim.keymap.set('n', '<localleader>tr', function()
+        neotest.run.run()
+        neotest.summary.open()
+      end, map_opts)
+
+      map_opts['desc'] = 'Test output'
+      vim.keymap.set('n', '<localleader>to', function()
+        neotest.output.open { last_run = true, enter = true }
+      end)
+
+      map_opts['desc'] = 'Test summary toggle'
+      vim.keymap.set('n', '<localleader>tt', function()
+        neotest.summary.toggle()
+        -- u.resize_vertical_splits()
+      end, map_opts)
+
+      -- vim.keymap.set(
+      --   "n",
+      --   "<localleader>tn",
+      --   neotest.jump.next,
+      --   map_opts
+      -- )
+      --
+      -- vim.keymap.set(
+      --   "n",
+      --   "<localleader>tp",
+      --   neotest.jump.prev,
+      --   map_opts
+      -- )
+
+      map_opts['desc'] = 'Test last'
+      vim.keymap.set('n', '<localleader>tl', function()
+        neotest.run.run_last { enter = true }
+        neotest.output.open { last_run = true, enter = true }
+      end, map_opts)
+    end,
+  },
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- put them in the right spots if you want.
@@ -1493,6 +1708,16 @@ require('lazy').setup {
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
   -- { import = 'custom.plugins' },
 }
+
+vim.cmd [[
+command! NeotestSummary lua require("neotest").summary.toggle()
+command! NeotestFile lua require("neotest").run.run(vim.fn.expand("%"))
+command! Neotest lua require("neotest").run.run(vim.fn.getcwd())
+command! NeotestNearest lua require("neotest").run.run()
+command! NeotestDebug lua require("neotest").run.run({ strategy = "dap" })
+command! NeotestAttach lua require("neotest").run.attach()
+command! NeotestOutput lua require("neotest").output.open()
+]]
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
