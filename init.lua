@@ -226,9 +226,9 @@ vim.keymap.set('n', '<leader>xj', ":%!jq '.'", { desc = 'Format JSON' })
 --   end
 -- end, { desc = 'Run test file' })
 
-vim.keymap.set('n', '<leader>xt', ':!pytest %<cr>', { desc = 'Run test file' })
-vim.keymap.set('n', '<leader>x1', ':!python3 % --p 0<cr>', { desc = 'Run Part 1' })
-vim.keymap.set('n', '<leader>x2', ':!python3 % --p 1<cr>', { desc = 'Run Part 2' })
+vim.keymap.set('n', '<leader>xt', ':!pytest %<cr> | tee test.log', { desc = 'Run test file' })
+vim.keymap.set('n', '<leader>x1', ':!python3 % --p 0<cr> | tee out.log', { desc = 'Run Part 1' })
+vim.keymap.set('n', '<leader>x2', ':!python3 % --p 1<cr> | tee out.log', { desc = 'Run Part 2' })
 -- ["<leader>p"] = {"[[\"_dP]]", desc="Paste from clipboard"},
 -- ["<leader>y"] = {"[[\"+y]]", desc="Copy to clipboard"},
 --
